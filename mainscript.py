@@ -1,23 +1,38 @@
 import numpy as np
 import pandas as pd
 
+
 df = pd.DataFrame(pd.read_excel("400212752_2024-09-03_CakeDetection.xls"))
 #print(df)
+
+#eliminate first row
+df = df.drop(0)
+
+# df = df.drop(["Timestamp"], axis=1)
+# def histogram_intersection(a, b):
+#     v = np.minimum(a, b).sum().round(decimals=1)
+#     return v
+# print("<<<<<<<<<<<<<<<<<<<")
+# print(df.corr(method=histogram_intersection))
+# print("<<<<<<<<<<<<<<<<<<<")
+
+# eliminate step 11
+indexes_with_step_11 = df[df["StepIndx"] == 11].index
+df = df.drop(indexes_with_step_11)
+print(df.head())
+
+#create time steps in seconds
+shape_of_df = df.shape
+print(shape_of_df)
+time = []
+for x in range(shape_of_df[0]):
+    time.append(5*x)
+#print(time)
+
 
 print("---")
 selection_of_df = df.filter(["Current", "imb", "StepIndx"])
 print("selection of df:")
-print(selection_of_df)
-
-#print("---<<")
-#print(df["imb"])
-
-print("---<<---<<<")
-
-#print(selection_of_df["Current"])
-
-print("---<<---!")
-selection_of_df = selection_of_df.drop(0)
 print(selection_of_df)
 
 selection_np = selection_of_df.to_numpy()
@@ -45,4 +60,15 @@ def find_batch_end(index_array):
 
 endpoints_of_step_index = find_batch_end(step_index)
 print(endpoints_of_step_index)
+print("len endpoints")
+print(len(endpoints_of_step_index))
+
+print("----")
+
+def histogram_intersection(a, b):
+    v = np.minimum(a, b).sum().round(decimals=1)
+    return v
+print("<<<<<<<<<<<<<<<<<<<")
+print(selection_of_df.corr(method=histogram_intersection))
+print("<<<<<<<<<<<<<<<<<<<")
 
