@@ -18,7 +18,8 @@ df = read_file("400212752_2024-09-03_CakeDetection.xls")
 # indexes_with_step_11 = df[df["StepIndx"] ==11].index
 # df = df.drop(indexes_with_step_11)
 # print(df["StepIndx"].unique())
-df = df[382:469]
+df = df[1:]
+
 selection_of_df = df.filter(["imb", "StepIndx", "Current", "PeelerMoveT", "MachStat", "density", "flow", "PlantActStepTime", "PlantSetStepTime", "Feedtime", "FeedPause", "FeedPulse", "PulseTimeFeedValve", "PauseTimeFeedValve"])
 # print(selection_of_df.head())
 size = len(selection_of_df)
@@ -78,7 +79,7 @@ corr_matrix = df_standardized.corr()
 #
 # current = selection_np[:,0]
 # imbalance = selection_np[:,1]
-step_index = selection_np[:,2]
+step_index = selection_np[:,1]
 # # print(current)
 # # print(imbalance)
 # # print(step_index)
@@ -88,14 +89,27 @@ step_index = selection_np[:,2]
 #
 
 def find_batch_end(index_array):
-    endpoints = []
+    startpoints = []
     for i in range(index_array.shape[0]):
         if index_array[i]  == 1 and index_array[i-1]  == 8:
-            endpoints.append(i)
-    return endpoints
+            startpoints.append(i)
+    return startpoints
 
-endpoints_of_step_index = find_batch_end(step_index)
-# print(endpoints_of_step_index)
+startpoints_of_step_index = find_batch_end(step_index)
+print(startpoints_of_step_index)
+
+# first batch j=0
+
+def defineBatches(start, df, j):
+    if j==0:
+        batch = df[0:start[j]-1]
+    else:
+        batch = df[start[j-1]:start[j]-1]
+    return batch
+
+batch_number = 2
+batch = defineBatches(startpoints_of_step_index, selection_of_df, batch_number)
+print(f"Batch {batch_number}\n", batch)
 
 
 
