@@ -5,9 +5,7 @@ from sklearn.preprocessing import StandardScaler
 import seaborn as sns
 
 def read_file(file_name):
-
     df = pd.DataFrame(pd.read_excel(file_name))
-
     return df
 
 df = read_file("400212752_2024-09-03_CakeDetection.xls")
@@ -18,10 +16,15 @@ df = read_file("400212752_2024-09-03_CakeDetection.xls")
 # indexes_with_step_11 = df[df["StepIndx"] ==11].index
 # df = df.drop(indexes_with_step_11)
 # print(df["StepIndx"].unique())
+
+# remove Row 2 in Excel with Text Descriptions
 df = df[1:]
 
+# select parameters
 selection_of_df = df.filter(["imb", "StepIndx", "Current", "PeelerMoveT", "MachStat", "density", "flow", "PlantActStepTime", "PlantSetStepTime", "Feedtime", "FeedPause", "FeedPulse", "PulseTimeFeedValve", "PauseTimeFeedValve"])
 # print(selection_of_df.head())
+
+# time in 5sec steps
 size = len(selection_of_df)
 start = 0
 time = []
@@ -30,7 +33,8 @@ for i in range(size):
         time.append(i)
     else:
         time.append(time[i-1] + 5)
-#
+
+# add column time to dataframe
 selection_of_df["time"] = time
 
 selection_np = selection_of_df.to_numpy()
