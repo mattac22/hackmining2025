@@ -1,3 +1,8 @@
+# Hackathon HackMining2025 Team Members: Christian Sinn, Srishti Mishra, Chuxin Yuan, Zhishan Wang
+
+# potential error in feedtimes (line 113-125) -> peaks (at batch with rinsing(step 10)) in final plot should not occur
+# because the duration of step 2 is counted.
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -12,18 +17,11 @@ df = read_file("400212752_2024-09-03_CakeDetection.xls")
 print("raw df:")
 print(df)
 
-# print(df.columns)
-# print(df.head())
-# #print("---")
-# indexes_with_step_11 = df[df["StepIndx"] ==11].index
-# df = df.drop(indexes_with_step_11)
-# print(df["StepIndx"].unique())
-
 # remove row 0 in dataframe = Row 2 in Excel with Text Descriptions
 df = df[1:]
 
 # remove step 11 at beginning of excel list
-indexes_with_step_11 = df[df["StepIndx"] ==11].index
+indexes_with_step_11 = df[df["StepIndx"] == 11].index
 # print("indexes_with_step_11")
 # print(indexes_with_step_11)
 # print("indexes_with_step_11 length")
@@ -34,7 +32,7 @@ df = df.drop(indexes_with_step_11)
 selection_of_df = df.filter(["imb", "StepIndx", "Current", "PeelerMoveT", "MachStat", "density", "flow", "PlantActStepTime", "PlantSetStepTime", "Feedtime", "FeedPause", "FeedPulse", "PulseTimeFeedValve", "PauseTimeFeedValve"])
 # print(selection_of_df.head())
 
-# time in 5sec steps
+# time series in 5sec steps
 size = len(selection_of_df)
 start = 0
 time = []
@@ -50,6 +48,7 @@ selection_of_df["time"] = time
 selection_np = selection_of_df.to_numpy()
 # selection_of_df.plot(x="time", y= ["imb", "StepIndx", "Current", "PeelerMoveT", "MachStat", "density", "flow", "PlantActStepTime", "PlantSetStepTime", "Feedtime", "FeedPause", "FeedPulse", "PulseTimeFeedValve", "PauseTimeFeedValve"], kind="line", figsize=(10,10), label=['Imbalance of batch 1', 'StepIndx of batch 1'])
 
+#scaling for corr heat map
 scaler = StandardScaler()
 df_standardized = pd.DataFrame(scaler.fit_transform(selection_of_df), columns=selection_of_df.columns)
 
@@ -69,38 +68,15 @@ corr_matrix = df_standardized.corr()
 # plt.title('Heatmap of Standardized Variables')
 # plt.show()
 
-
 # plt.grid()
 # plt.show()
 
-#
-# #print("---<<")
-# #print(df["imb"])
-#
-# #print("---<<---<<<")
-#
-# #print(selection_of_df["Current"])
-#
-# #print("---<<---!")
-# selection_of_df = selection_of_df.drop(0)
-# #print(selection_of_df)
-#
-
-#
-# #print("---<<---!!!!!")
 print("selection_np shape:")
 print(selection_np.shape)
-#
-# current = selection_np[:,0]
-# imbalance = selection_np[:,1]
+
+# step column
 step_index = selection_np[:,1]
-# # print(current)
-# # print(imbalance)
-# # print(step_index)
-#
 # shape_of_step_index = step_index.shape
-# print("Length of step index is: ", shape_of_step_index[0])
-#
 
 # switch from state 8->1 new batch starts
 def find_batch_end(index_array):
@@ -127,10 +103,12 @@ def defineBatches(start, df, j):
         batch = df[start[j-1]-1:start[j]-1]
     return batch
 
+# calculate total time of a step in a specific batch(batch is a dataframe)
 def calculateStepTime(df, stepNr):
     indexes = df[df["StepIndx"] == stepNr].index
     time_of_step = 5*len(indexes)
     return time_of_step
+
 
 #calculate trend of feedtime over multiple batches
 feedtimes = []
@@ -150,15 +128,15 @@ print(feedtimes)
 print(len(feedtimes))
 print(range(1, len(feedtimes)+1, 1))
 
-#plots
+#plot of feedtimes (blue curve with circles)
 x_ax = range(1, len(feedtimes)+1)
 y_ax = feedtimes
-
 plt.plot(x_ax, y_ax, marker='o', linestyle='-')
 # fig, ax = plt.plot()
 # ax.plot(x_ax, y_ax)
 #plt.show()
 
+# calculate intervals with multiple batches in a row seperated by cleaning step(-1)
 modified_feedtimes = feedtimes
 for j in range(len(feedtimes)):
     if feedtimes[j] > 120:
@@ -175,7 +153,7 @@ col = 0
 for k in range(len(modified_feedtimes)):
    if modified_feedtimes[k] == -1:
        found_peak += 1
-       # k not included
+       # k not included in [_:k]
        y_int = modified_feedtimes[interval_start[found_peak-1]:k]
        print(y_int)
        #interval_storage[f"{col}"] = y_int
@@ -195,6 +173,7 @@ print(interval_start)
 print("end")
 print(interval_end)
 
+# for every interval (with multiple batches) calculate a linear approximation of points
 for intvl in range(7):
     x_plt = x_ax[interval_start[intvl]:interval_end[intvl]+1]
     print("x")
@@ -203,7 +182,7 @@ for intvl in range(7):
     print("y")
     print(y_plt)
 
-    # calculate polynomial
+    # calculate linear(1) approximation
     z_plt = np.polyfit(x_plt, y_plt, 1)
     f_plt = np.poly1d(z_plt)
 
@@ -214,6 +193,7 @@ for intvl in range(7):
     plt.ylabel("Duration of Feed step 2")
     plt.plot(x_plot, y_plot, linewidth=3)
 
+# show batch 11 on command line
 batch = defineBatches(startpoints_of_step_index, selection_of_df, 11-1)
 print("batch 11:")
 print(batch)
