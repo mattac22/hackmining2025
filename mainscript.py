@@ -157,13 +157,60 @@ y_ax = feedtimes
 plt.plot(x_ax, y_ax, marker='o', linestyle='-')
 # fig, ax = plt.plot()
 # ax.plot(x_ax, y_ax)
+#plt.show()
+
+modified_feedtimes = feedtimes
+for j in range(len(feedtimes)):
+    if feedtimes[j] > 120:
+        modified_feedtimes[j] = -1
+
+print("----   ------     -----     -----")
+#interval_storage = pd.DataFrame()
+
+interval_start = []
+interval_start.append(0)
+interval_end = []
+found_peak = 0
+col = 0
+for k in range(len(modified_feedtimes)):
+   if modified_feedtimes[k] == -1:
+       found_peak += 1
+       # k not included
+       y_int = modified_feedtimes[interval_start[found_peak-1]:k]
+       print(y_int)
+       #interval_storage[f"{col}"] = y_int
+       #col += 1
+       x_int = range(interval_start[found_peak-1]+1,k+1)
+       print(x_int)
+       #interval_storage[f"{col}"] = x_int
+       #col += 1
+       interval_end.append(k-1)
+       if k < len(modified_feedtimes)-1:
+           interval_start.append(k+1)
+interval_end.append(len(modified_feedtimes)-1)
+
+#print(interval_storage)
+print("start")
+print(interval_start)
+print("end")
+print(interval_end)
+
+for intvl in range(7):
+    x_plt = x_ax[interval_start[intvl]:interval_end[intvl]+1]
+    print("x")
+    print(x_plt)
+    y_plt = modified_feedtimes[interval_start[intvl]:interval_end[intvl]+1]
+    print("y")
+    print(y_plt)
+
+    # calculate polynomial
+    z_plt = np.polyfit(x_plt, y_plt, 1)
+    f_plt = np.poly1d(z_plt)
+
+    x_plot = x_plt
+    y_plot = f_plt(x_plot)
+    plt.plot(x_plot, y_plot)
 plt.show()
-
-
-
-
-
-
 
 
 
