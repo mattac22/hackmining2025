@@ -209,7 +209,15 @@ for intvl in range(7):
 
     x_plot = x_plt
     y_plot = f_plt(x_plot)
-    plt.plot(x_plot, y_plot)
+    plt.title("Feed time trend")
+    plt.xlabel("Batch number")
+    plt.ylabel("Duration of Feed step 2")
+    plt.plot(x_plot, y_plot, linewidth=3)
+
+batch = defineBatches(startpoints_of_step_index, selection_of_df, 11-1)
+print("batch 11:")
+print(batch)
+
 plt.show()
 
 
