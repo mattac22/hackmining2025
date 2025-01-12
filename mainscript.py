@@ -22,12 +22,12 @@ print(df)
 # remove row 0 in dataframe = Row 2 in Excel with Text Descriptions
 df = df[1:]
 
-testdf = df[1:3]
-print("testdf")
-print(testdf)
-
 # remove step 11 at beginning of excel list
 indexes_with_step_11 = df[df["StepIndx"] ==11].index
+# print("indexes_with_step_11")
+# print(indexes_with_step_11)
+# print("indexes_with_step_11 length")
+# print(len(indexes_with_step_11))
 df = df.drop(indexes_with_step_11)
 
 # select parameters
@@ -127,18 +127,37 @@ def defineBatches(start, df, j):
         batch = df[start[j-1]-1:start[j]-1]
     return batch
 
+def calculateStepTime(df, stepNr):
+    indexes = df[df["StepIndx"] == stepNr].index
+    time_of_step = 5*len(indexes)
+    return time_of_step
 
-batch_number = 0
-batch = defineBatches(startpoints_of_step_index, selection_of_df, batch_number)
-print(f"Batch {batch_number}\n", batch)
+#calculate trend of feedtime over multiple batches
+feedtimes = []
+num_batches = len(startpoints_of_step_index)+1
 
-batch_number = 1
-batch = defineBatches(startpoints_of_step_index, selection_of_df, batch_number)
-print(f"Batch {batch_number}\n", batch)
+for batch_nr in range(num_batches-1):
+    batch = defineBatches(startpoints_of_step_index, selection_of_df, batch_nr)
+    #print(f"Batch {batch_nr}\n", batch)
 
-batch_number = 2
-batch = defineBatches(startpoints_of_step_index, selection_of_df, batch_number)
-print(f"Batch {batch_number}\n", batch)
+    # calculate steptime of step 2 filling
+    steptime_st2 = calculateStepTime(batch, 2)
+    feedtimes.append(steptime_st2)
+
+print("feedtimes")
+print(feedtimes)
+
+print(len(feedtimes))
+print(range(1, len(feedtimes)+1, 1))
+
+#plots
+x_ax = range(1, len(feedtimes)+1)
+y_ax = feedtimes
+
+plt.plot(x_ax, y_ax, marker='o', linestyle='-')
+# fig, ax = plt.plot()
+# ax.plot(x_ax, y_ax)
+plt.show()
 
 
 
